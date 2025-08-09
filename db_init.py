@@ -1,0 +1,20 @@
+import sqlite3
+
+con = sqlite3.connect("vpn.db")
+
+cur = con.cursor()
+
+cur.execute("""
+    CREATE TABLE Configs
+        (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            isDelete INTEGER DEFAULT 0,
+            isActive INTEGER DEFAULT 1,
+            fileName TEXT DEFAULT "",
+            fileId INTEGER DEFAULT -1,
+            nameClient TEXT
+        );
+""")
+
+cur.close()
+con.close()
