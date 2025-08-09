@@ -10,8 +10,6 @@ from config_reader import config
 from handlers import dp as dispatcher
 
 
-env = pydotenv.Environment()
-
 
 logging.basicConfig(level=logging.INFO)
 

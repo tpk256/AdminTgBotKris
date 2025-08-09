@@ -16,5 +16,7 @@ cur.execute("""
         );
 """)
 
+con.commit()
+
 cur.close()
 con.close()

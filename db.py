@@ -43,7 +43,7 @@ class Db:
 
         print(id_)
         file_name = f"client_user_{id_}"
-        # self._create_config(file_name)
+        self._create_config(file_name)
 
         # TODO обработать момент, что конфиг не создался
         self.cursor.execute(
