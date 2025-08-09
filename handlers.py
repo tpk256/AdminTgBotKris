@@ -29,7 +29,9 @@ async def cmd_start(
         message: types.Message,
         is_auth: bool
 ):
-    print(is_auth)
+    if not is_auth:
+        await message.answer("Access Denied!")
+        return
     await message.answer("Здравствуйте, вы в админ панели vpn сервера.", reply_markup=keyboard_menu)
 
 
@@ -51,8 +53,12 @@ def create_ans(conf: Config):
 @dp.callback_query(ConfigCallbackFactory.filter())
 async def callbacks_client_config(
         callback: types.CallbackQuery,
-        callback_data: ConfigCallbackFactory
+        callback_data: ConfigCallbackFactory,
+        is_auth: bool
 ):
+    if not is_auth:
+        await callback.answer("Access Denied!")
+        return
     # TODO дописать конфиги
 
     match callback_data.action:
@@ -74,7 +80,10 @@ async def callbacks_client_config(
                 reply_markup=keyboard_menu
             )
         case "download":
-            ...
+            conf = db.get_config(id_=callback_data.config_id)
+            await callback.message.answer_document(
+                document=conf.file_id
+            )
 
         case "switch_off":
             ...
@@ -89,8 +98,12 @@ async def callbacks_client_config(
 @dp.callback_query(lambda f: f.data in ["list_config", "back_to_configs"])
 async def callback_list_config(
         callback: types.CallbackQuery,
-        state: FSMContext
+        state: FSMContext,
+        is_auth: bool
 ):
+    if not is_auth:
+        await callback.answer("Access Denied!")
+        return
     confs = db.all_configs()
     await callback.message.edit_text(
         text="Все конфиги:",
@@ -112,8 +125,13 @@ async def callback_back_to_panel(
 @dp.callback_query(F.data == "create_config")
 async def callback_create_config(
         callback: types.CallbackQuery,
-        state: FSMContext
+        state: FSMContext,
+        is_auth: bool
 ):
+    if not is_auth:
+        await callback.answer("Access Denied!")
+        return
+
     if db.count_config() == 10:
         await callback.message.answer(
             text="Количество конфигов не может быть больше 10."
@@ -155,10 +173,14 @@ async def cancel(
 )
 async def config_create(
         msg: types.Message,
-        state: FSMContext
+        state: FSMContext,
+        is_auth: bool
 ):
+    if not is_auth:
+        await msg.answer("Access Denied!")
+        return
 
-    db.create_config(msg.text)
+    await db.create_config(msg.text, chat_id=msg.chat.id)
 
     await msg.answer(
         f"Вы успешно создали конфиг {msg.text}",

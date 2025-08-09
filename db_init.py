@@ -11,7 +11,7 @@ cur.execute("""
             isDelete INTEGER DEFAULT 0,
             isActive INTEGER DEFAULT 1,
             fileName TEXT DEFAULT "",
-            fileId INTEGER DEFAULT -1,
+            fileId TEXT DEFAULT "",
             nameClient TEXT
         );
 """)

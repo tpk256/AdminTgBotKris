@@ -8,7 +8,7 @@ from aiogram.filters import Command
 
 from config_reader import config
 from handlers import dp as dispatcher
-
+from loader import SingleBot
 
 
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +19,7 @@ dp = dispatcher
 
 
 async def main():
+    SingleBot.bot = bot
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

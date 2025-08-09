@@ -6,14 +6,14 @@ from pydantic import BaseModel
 from auto_easyrsa import gen_req, sign_req
 from move import mov_key_and_crt
 from config_reader import config
-
+from loader import load_file
 
 
 class Config(BaseModel):
     id: int
     is_active: bool
     file_name: str
-    file_id: int
+    file_id: str
     client_name: str
 
 
@@ -23,7 +23,7 @@ class Db:
         self.conn = sqlite3.connect(name_db)
         self.cursor = self.conn.cursor()
 
-    def _create_config(self, file_name: str) -> int:
+    def _create_config(self, file_name: str):
         gen_req(file_name)
         sign_req(file_name, config.ca_pass.get_secret_value())
         mov_key_and_crt(file_name)
@@ -32,7 +32,7 @@ class Db:
         result.check_returncode()
 
 
-    def create_config(self, name_client):
+    async def create_config(self, name_client, chat_id: int):
         self.cursor.execute("SELECT Max(Id) FROM Configs;")
         id_ = self.cursor.fetchone()[0]
 
@@ -44,12 +44,16 @@ class Db:
         print(id_)
         file_name = f"client_user_{id_}"
         self._create_config(file_name)
+        file_id = await load_file(f"/client-configs/files/{file_name}.ovpn", file_name, chat_id)
+
 
         # TODO обработать момент, что конфиг не создался
         self.cursor.execute(
-            """INSERT INTO Configs (Id, nameClient, fileName) VALUES (?, ?, ?)""",
-                            (id_, name_client, file_name)
+            """INSERT INTO Configs (Id, nameClient, fileName, fileId) VALUES (?, ?, ?, ?)""",
+                            (id_, name_client, file_name, file_id)
         )
+
+
         self.conn.commit()
 
     def get_config(self, id_: int) -> Config | None:
