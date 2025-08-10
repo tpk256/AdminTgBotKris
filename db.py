@@ -3,7 +3,7 @@ import subprocess
 
 from pydantic import BaseModel
 
-from auto_easyrsa import gen_req, sign_req
+from auto_easyrsa import gen_req, sign_req, revoke_req
 from move import mov_key_and_crt
 from config_reader import config
 from loader import load_file
@@ -44,7 +44,7 @@ class Db:
         print(id_)
         file_name = f"client_user_{id_}"
         self._create_config(file_name)
-        file_id = await load_file(f"/client-configs/files/{file_name}.ovpn", file_name, chat_id)
+        file_id = await load_file(f"/client-configs/files/{file_name}.ovpn", f"{name_client}.ovpn", chat_id)
 
 
         # TODO обработать момент, что конфиг не создался
@@ -87,8 +87,12 @@ class Db:
 
         return res
 
-    def delete_config(self, id_: int):
-        ...
+    def delete_config(self, conf: Config):
+
+        revoke_req(conf.file_name, config.ca_pass.get_secret_value())
+
+        self.cursor.execute("UPDATE Configs SET isDelete = 1 WHERE Id = ?", (conf.id, ))
+        self.conn.commit()
 
     def pause_config(self, id_: int):
         ...

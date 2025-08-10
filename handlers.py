@@ -13,7 +13,9 @@ from middleware import CheckAdminMiddleware
 from keyboards import (keyboard_menu,
                        get_inline_keyboard_configs,
                        get_keyboard_cancel,
-                       get_inline_keyboard_config)
+                       get_inline_keyboard_config,
+                       get_inline_keyboard_delete_choice
+                       )
 from fabrics import ConfigCallbackFactory
 from fsm import ClientConfigState
 from db import Db, Config
@@ -71,12 +73,25 @@ async def callbacks_client_config(
                 reply_markup=get_inline_keyboard_config(conf)
             )
 
-        case "delete":
-            db.delete_config(callback_data.config_id)
-            await callback.message.answer("Конфиг успешно удален!")
-
+        case "pre_delete":
+            conf = db.get_config(callback_data.config_id)
             await callback.message.edit_text(
-                text="Здравствуйте, вы в админ панели vpn сервера.",
+                text=f"Вы уверены, что хотите удалить конфиг: {conf.client_name} ?",
+                reply_markup=get_inline_keyboard_delete_choice(conf.id)
+            )
+
+        case "accept_delete":
+            conf = db.get_config(callback_data.config_id)
+            db.delete_config(conf)
+            await callback.message.answer(f"Вы успешно удалили конфиг: {conf.client_name}.")
+            await callback.message.edit_text(
+                text=f"Здравствуйте, вы в админ панели vpn сервера.",
+                reply_markup=keyboard_menu
+            )
+
+        case "cancel_delete":
+            await callback.message.edit_text(
+                text=f"Здравствуйте, вы в админ панели vpn сервера.",
                 reply_markup=keyboard_menu
             )
         case "download":

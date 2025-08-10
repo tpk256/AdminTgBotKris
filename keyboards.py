@@ -42,7 +42,7 @@ def get_inline_keyboard_config(conf: Config):
     builder = InlineKeyboardBuilder()
 
     builder.button(text="Скачать", callback_data=ConfigCallbackFactory(action="download", config_id=conf.id))
-    builder.button(text="Удалить", callback_data=ConfigCallbackFactory(action="delete", config_id=conf.id))
+    builder.button(text="Удалить", callback_data=ConfigCallbackFactory(action="pre_delete", config_id=conf.id))
 
     builder.button(text="Деактивировать",
                    callback_data=ConfigCallbackFactory(
@@ -73,6 +73,23 @@ def get_inline_keyboard_configs(confs: list[Config]):
         callback_data="back_to_panel"
     )
     builder.adjust(1)
+    return builder.as_markup()
+
+
+
+def get_inline_keyboard_delete_choice(id: int):
+    builder = InlineKeyboardBuilder()
+
+    builder.button(
+        text="Да",
+        callback_data=ConfigCallbackFactory(action='accept_delete', config_id=id)
+    )
+    builder.button(
+        text="Нет",
+        callback_data=ConfigCallbackFactory(action='cancel_delete', config_id=id)
+    )
+
+    builder.adjust(2)
     return builder.as_markup()
 
 
