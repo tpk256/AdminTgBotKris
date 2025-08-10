@@ -137,6 +137,25 @@ async def callback_back_to_panel(
     )
 
 
+
+@dp.callback_query(F.data == "help")
+async def callback_help(
+        callback: types.CallbackQuery,
+        state: FSMContext,
+        is_auth: bool
+):
+    if not is_auth:
+        await callback.answer("Access Denied!")
+        return
+
+    await callback.message.answer(
+        text="Я верю, что ты Сыльная незавимая!",
+    )
+    await callback.answer()
+
+
+
+
 @dp.callback_query(F.data == "create_config")
 async def callback_create_config(
         callback: types.CallbackQuery,

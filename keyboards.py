@@ -10,7 +10,7 @@ def get_inline_keyboard_menu():
     builder = InlineKeyboardBuilder()
 
     data = [
-        [("Конфиги", "list_config"), ("Активные клиенты", "active_clients")],
+        [("Конфиги", "list_config")],
         [("Создать конфиг", "create_config"), ("Обратиться в помощь", "help")],
 
     ]
@@ -43,13 +43,6 @@ def get_inline_keyboard_config(conf: Config):
 
     builder.button(text="Скачать", callback_data=ConfigCallbackFactory(action="download", config_id=conf.id))
     builder.button(text="Удалить", callback_data=ConfigCallbackFactory(action="pre_delete", config_id=conf.id))
-
-    builder.button(text="Деактивировать",
-                   callback_data=ConfigCallbackFactory(
-                        action="switch_off" if conf.is_active else "switch_on",
-                        config_id=conf.id)
-    )
-
     builder.button(text="Вернуться к конфигам", callback_data="back_to_configs")
 
     builder.adjust(2)
