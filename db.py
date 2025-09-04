@@ -3,8 +3,7 @@ import subprocess
 
 from pydantic import BaseModel
 
-from auto_easyrsa import gen_req, sign_req, revoke_req
-from move import mov_key_and_crt
+from auto_easyrsa import gen_req, sign_req, revoke_req, mov_key_and_crt
 from config_reader import config
 from loader import load_file
 
@@ -17,7 +16,6 @@ class Config(BaseModel):
     client_name: str
 
 
-# TODO доделать всё
 class Db:
     def __init__(self, name_db: str = 'vpn.db'):
         self.conn = sqlite3.connect(name_db)
@@ -93,9 +91,6 @@ class Db:
 
         self.cursor.execute("UPDATE Configs SET isDelete = 1 WHERE Id = ?", (conf.id, ))
         self.conn.commit()
-
-    def pause_config(self, id_: int):
-        ...
 
     def count_config(self) -> int:
         return len(self.all_configs())

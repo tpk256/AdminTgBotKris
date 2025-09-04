@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import Optional
 
 from aiogram import F
 from aiogram import Dispatcher, types
@@ -19,6 +20,8 @@ from keyboards import (keyboard_menu,
 from fabrics import ConfigCallbackFactory
 from fsm import ClientConfigState
 from db import Db, Config
+from config_reader import config
+from openvpn_status import OpenVpnClient, get_status_clients
 
 logging.basicConfig(level=logging.INFO)
 
@@ -38,8 +41,24 @@ async def cmd_start(
 
 
 
+def create_ans(conf: Config, open_vpn_client: Optional[OpenVpnClient]=None):
 
-def create_ans(conf: Config):
+    open_vpn_info = f"""
+    ---------------
+    Информация расширенная по клиенту
+    ---------------
+    Real address: {open_vpn_client.real_address}
+    Virtual address: {open_vpn_client.virtual_address}
+    Mb send: {open_vpn_client.bytes_sent / (1024 ** 2) }
+    Mb received: {open_vpn_client.bytes_received / (1024 ** 2) }
+    ---------------
+    Bytes send: {open_vpn_client.bytes_sent}
+    Bytes received: {open_vpn_client.received}
+    ---------------
+    Duration session: {open_vpn_client.duration_session / 60} Minutes
+    ---------------
+
+    """
     return f"""
     Информация по клиенту
     ---------------
@@ -48,8 +67,9 @@ def create_ans(conf: Config):
     File Name: {conf.file_name}
     ---------------
     Клиент: {conf.client_name}
-    Статус: {"Активный" if conf.is_active else "НЕактивный"}
-    """
+    Соединение:""" + ("\U0001F7E2" if open_vpn_client else "\U0001F534") + open_vpn_info
+
+
 
 
 @dp.callback_query(ConfigCallbackFactory.filter())
@@ -61,15 +81,19 @@ async def callbacks_client_config(
     if not is_auth:
         await callback.answer("Access Denied!")
         return
-    # TODO дописать конфиги
 
     match callback_data.action:
 
         case "get":
             conf = db.get_config(id_=callback_data.config_id)
+            clients = {}
+            try:
+                clients = get_status_clients(host=config.host_managment, port=config.port_managment)
+            except Exception:   # TODO
+                pass
 
             await callback.message.edit_text(
-                text=create_ans(conf),
+                text=create_ans(conf, open_vpn_client=clients.get(conf.file_name, None)),
                 reply_markup=get_inline_keyboard_config(conf)
             )
 
@@ -99,12 +123,6 @@ async def callbacks_client_config(
             await callback.message.answer_document(
                 document=conf.file_id
             )
-
-        case "switch_off":
-            ...
-        case "switch_on":
-            ...
-
 
     await callback.answer()
 
@@ -155,7 +173,6 @@ async def callback_help(
 
 
 
-
 @dp.callback_query(F.data == "create_config")
 async def callback_create_config(
         callback: types.CallbackQuery,
@@ -197,8 +214,6 @@ async def cancel(
         reply_markup=ReplyKeyboardRemove()
     )
     await state.clear()
-
-
 
 
 

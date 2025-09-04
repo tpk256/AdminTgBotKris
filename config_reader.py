@@ -8,9 +8,13 @@ class Settings(BaseSettings):
     ca_pass: SecretStr
     admin_id: list[int]
 
+    host_managment: str
+    port_managment: int
+
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
 
 config = Settings()
+
 

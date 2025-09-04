@@ -1,10 +1,7 @@
 import asyncio
 import logging
 
-
-import pydotenv
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+from aiogram import Bot
 
 from config_reader import config
 from handlers import dp as dispatcher

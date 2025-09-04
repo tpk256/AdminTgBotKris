@@ -1,9 +1,9 @@
 from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
-from aiogram.types import TelegramObject, Message, CallbackQuery
-
+from aiogram.types import TelegramObject
 
 from config_reader import config
+
 
 class CheckAdminMiddleware(BaseMiddleware):
     async def __call__(
