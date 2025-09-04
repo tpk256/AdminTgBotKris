@@ -42,8 +42,10 @@ async def cmd_start(
 
 
 def create_ans(conf: Config, open_vpn_client: Optional[OpenVpnClient]=None):
+    open_vpn_info = None
 
-    open_vpn_info = f"""
+    if open_vpn_client:
+        open_vpn_info = f"""
     ---------------
     Информация расширенная по клиенту
     ---------------
@@ -53,12 +55,11 @@ def create_ans(conf: Config, open_vpn_client: Optional[OpenVpnClient]=None):
     Mb received: {open_vpn_client.bytes_received / (1024 ** 2) }
     ---------------
     Bytes send: {open_vpn_client.bytes_sent}
-    Bytes received: {open_vpn_client.received}
+    Bytes received: {open_vpn_client.bytes_received}
     ---------------
     Duration session: {open_vpn_client.duration_session / 60} Minutes
-    ---------------
+    ---------------"""
 
-    """
     return f"""
     Информация по клиенту
     ---------------
@@ -67,7 +68,7 @@ def create_ans(conf: Config, open_vpn_client: Optional[OpenVpnClient]=None):
     File Name: {conf.file_name}
     ---------------
     Клиент: {conf.client_name}
-    Соединение:""" + ("\U0001F7E2" if open_vpn_client else "\U0001F534") + open_vpn_info
+    Соединение:""" + ("\U0001F7E2" + open_vpn_info if open_vpn_info else "\U0001F534")
 
 
 
