@@ -51,13 +51,15 @@ def create_ans(conf: Config, open_vpn_client: Optional[OpenVpnClient]=None):
     ---------------
     Real address: {open_vpn_client.real_address}
     Virtual address: {open_vpn_client.virtual_address}
-    Mb send: {open_vpn_client.bytes_sent / (1024 ** 2) }
-    Mb received: {open_vpn_client.bytes_received / (1024 ** 2) }
+    Mb send(from server): {open_vpn_client.bytes_sent / (1024 ** 2) }
+    Mb received(to server): {open_vpn_client.bytes_received / (1024 ** 2) }
+    
     ---------------
     Bytes send: {open_vpn_client.bytes_sent}
     Bytes received: {open_vpn_client.bytes_received}
     ---------------
-    Duration session: {open_vpn_client.duration_session / 60} Minutes
+    Duration session: {open_vpn_client.duration_session / 60:.2f} Minutes
+    Average speed per second {open_vpn_client.bytes_sent / (1024 ** 2) / (open_vpn_client.duration_session+1):.2f} mb/s
     ---------------"""
 
     return f"""
@@ -92,10 +94,11 @@ async def callbacks_client_config(
                 clients = get_status_clients(host=config.host_managment, port=config.port_managment)
             except Exception:   # TODO
                 pass
-
+            print(conf.file_name, clients)
             await callback.message.edit_text(
                 text=create_ans(conf, open_vpn_client=clients.get(conf.file_name, None)),
-                reply_markup=get_inline_keyboard_config(conf)
+                reply_markup=get_inline_keyboard_config(conf),
+
             )
 
         case "pre_delete":
